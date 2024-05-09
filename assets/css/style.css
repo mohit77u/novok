@@ -1,0 +1,41 @@
+.bg-primary\/10 {
+  background-color: rgba(var(--theme), 0.1);
+}
+
+.bg-primary\/20 {
+  background-color: rgba(var(--theme), 0.2);
+}
+
+.bg-primary\/30 {
+  background-color: rgba(var(--theme), 0.3);
+}
+
+.bg-primary\/40 {
+  background-color: rgba(var(--theme), 0.4);
+}
+
+.bg-primary\/50 {
+  background-color: rgba(var(--theme), 0.5);
+}
+
+.bg-primary\/60 {
+  background-color: rgba(var(--theme), 0.6);
+}
+
+.bg-primary\/70 {
+  background-color: rgba(var(--theme), 0.7);
+}
+
+.bg-primary\/80 {
+  background-color: rgba(var(--theme), 0.8);
+}
+
+.bg-primary\/90 {
+  background-color: rgba(var(--theme), 0.9);
+}
+
+.bg-primary {
+  background-color: rgba(var(--theme), 1);
+}
+
+/*# sourceMappingURL=style.css.map */

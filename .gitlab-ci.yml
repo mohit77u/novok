@@ -1,0 +1,87 @@
+stages:
+  - build
+  - deploy
+  - cloudfront
+
+build prod:
+  image: node:latest
+  stage: build
+  tags:
+    - runner
+  script:
+    #- exit 1
+    - node -v && npm -v
+    - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+    - export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+    - source ~/.bashrc
+    - nvm install v16.20.0
+    - node -v && npm -v && ls
+    - npm install
+    # # Build App
+    - npm run generate
+    - ls dist/
+    - ls && pwd
+    - echo "form dev branch"
+    - mkdir artifact
+    - cp -r dist/* artifact
+  artifacts:
+    paths:
+      # Build folder
+      - artifact
+    expire_in: 1 day
+  only:
+    - dev
+
+deploy prod:
+  image:
+  stage: deploy
+  tags:
+    - runner
+  dependencies:
+    - build prod
+
+  variables:
+    Access_key: $AWS_ACCESS_KEY_ID
+    Secret_key_ENV: $AWS_SECRET_ACCESS_KEY
+    Region: $AWS_DEFAULT_REGION
+
+  script:
+    - echo $CI_COMMIT_BRANCH
+    - apt update -y
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    - unzip awscliv2.zip
+    - ./aws/install
+    - export AWS_ACCESS_KEY_ID=$Access_key
+    - export AWS_SECRET_ACCESS_KEY=$Secret_key_ENV
+    - export AWS_DEFAULT_REGION=$Region
+    - touch demo-file && cp demo-file artifact
+    - ls -la artifact
+    - aws s3 ls s3://novok-nuxt-frontend.topsdemo.org/ --region ap-south-1
+    - aws s3 --region ap-south-1 sync artifact s3://novok-nuxt-frontend.topsdemo.org/
+  only:
+    - dev
+
+cloudfront cache clear:
+  image:
+  stage: cloudfront
+  tags:
+    - runner
+  variables:
+    Access_key: $AWS_ACCESS_KEY_ID
+    Secret_key_ENV: $AWS_SECRET_ACCESS_KEY
+    Region: $AWS_DEFAULT_REGION
+  dependencies:
+    - build prod
+
+  script:
+    - apt update -y
+    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    - unzip awscliv2.zip
+    - ./aws/install
+    - export AWS_ACCESS_KEY_ID=$Access_key
+    - export AWS_SECRET_ACCESS_KEY=$Secret_key_ENV
+    - export AWS_DEFAULT_REGION=$Region
+    - aws cloudfront create-invalidation --distribution-id E3W1K7BT0UW7LT --paths "/*"
+
+  only:
+    - dev

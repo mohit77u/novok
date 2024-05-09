@@ -1,0 +1,11 @@
+
+
+@for $i from 1 through 9 {
+    .bg-primary\/#{$i*10} {
+        background-color: rgba($color: var(--theme), $alpha: $i/10);
+    }
+}
+
+.bg-primary{
+    background-color: rgba($color: var(--theme), $alpha: 1.0);
+}
